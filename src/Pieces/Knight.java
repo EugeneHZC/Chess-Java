@@ -2,16 +2,16 @@ package Pieces;
 
 import Game.Player;
 
-public class Pawn extends Piece {
-    public Pawn(int posX, int posY, Player player) {
+public class Knight extends Piece {
+    public Knight(int posX, int posY, Player player) {
         super(posX, posY, getImagePath(player), player);
     }
 
     private static String getImagePath(Player player) {
         if (player == Player.BLACK) {
-            return "Pieces/Assets/bp.png";
+            return "Pieces/Assets/bN.png";
         } else {
-            return "Pieces/Assets/wp.png";
+            return "Pieces/Assets/wN.png";
         }
     }
 
