@@ -1,10 +1,13 @@
 package Pieces;
 
 import Game.Player;
+import Game.Type;
+
+import java.util.ArrayList;
 
 public class Rook extends Piece{
     public Rook(int posX, int posY, Player player) {
-        super(posX, posY, getImagePath(player), player);
+        super(posX, posY, getImagePath(player), player, Type.ROOK);
     }
 
     private static String getImagePath(Player player) {
@@ -16,7 +19,7 @@ public class Rook extends Piece{
     }
 
     @Override
-    public void validMoves() {
-
+    public ArrayList<Integer[]> getValidMoves(Piece[][] board) {
+        return new ArrayList<>();
     }
 }

@@ -1,10 +1,13 @@
 package Pieces;
 
 import Game.Player;
+import Game.Type;
+
+import java.util.ArrayList;
 
 public class Knight extends Piece {
     public Knight(int posX, int posY, Player player) {
-        super(posX, posY, getImagePath(player), player);
+        super(posX, posY, getImagePath(player), player, Type.KNIGHT);
     }
 
     private static String getImagePath(Player player) {
@@ -16,7 +19,7 @@ public class Knight extends Piece {
     }
 
     @Override
-    public void validMoves() {
-
+    public ArrayList<Integer[]> getValidMoves(Piece[][] board) {
+        return new ArrayList<>();
     }
 }
