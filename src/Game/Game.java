@@ -17,10 +17,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
     private final Piece[][] board = new Piece[rows][cols];
 
     private final int windowsWidth = (int) (this.cellDimension * (cols + 1.0 / 4.0));
-    private final int windowsHeight = (int) (this.cellDimension * (cols + 1.0 / 2.0));
+    private final int windowsHeight = (int) (this.cellDimension * (cols + 1.0 / 2.0) + this.cellDimension);
 
     private Piece selectedPiece;
     private boolean isWhiteFirst = true;
+    private boolean isWhiteChecked = false;
+    private boolean isBlackChecked = false;
 
     private Timer timer;
     private final int delay = 5;
@@ -65,6 +67,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
     }
 
     public void paint(Graphics graphics) {
+        // background
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, this.windowsWidth, this.windowsHeight);
+
         // drawing the board
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
@@ -84,6 +90,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                     graphics.drawImage(piece.getImage(), piece.getPosX(), piece.getPosY(), this);
                 }
             }
+        }
+
+        graphics.setColor(Color.black);
+        graphics.setFont(new Font("arial", Font.BOLD, 30));
+        if (isWhiteFirst) {
+            graphics.drawString("White's turn", 10, this.windowsHeight - this.cellDimension);
+        } else {
+            graphics.drawString("Black's turn", 10, this.windowsHeight - this.cellDimension);
         }
 
         graphics.dispose();
@@ -142,17 +156,16 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                     // If the move is in the piece's valid moves, then it makes the move (including capturing a piece)
                     if (Arrays.equals(integers, new Integer[]{colClicked, rowClicked})) {
                         assert selectedPiece != null;
-                        if (selectedPiece.getType() == Type.PAWN) {
-                            selectedPiece.setIsFirstMove(false);
-                        }
+
+                        selectedPiece.setIsFirstMove(false);
 
                         // Setting new piece position as the selected piece, setting old position as null (represents no piece)
                         board[rowClicked][colClicked] = selectedPiece;
                         board[selectedPiece.getCurrentPos()[1]][selectedPiece.getCurrentPos()[0]] = null;
 
                         // Setting the piece's old position to the new position
-                        selectedPiece.setPosX(colClicked * Constants.CELL_DIMENSION.getValue() + pieceOffSetInCell);
-                        selectedPiece.setPosY(rowClicked * Constants.CELL_DIMENSION.getValue() + pieceOffSetInCell);
+                        selectedPiece.setPosX(colClicked * this.cellDimension + pieceOffSetInCell);
+                        selectedPiece.setPosY(rowClicked * this.cellDimension + pieceOffSetInCell);
                         selectedPiece.setCurrentPos();
 
                         isWhiteFirst = !isWhiteFirst;

@@ -1,5 +1,6 @@
 package Pieces;
 
+import Game.Constants;
 import Game.Player;
 import Game.Type;
 
@@ -25,7 +26,7 @@ public class Pawn extends Piece {
 
         if (this.getPlayer() == Player.BLACK) {
             // Move forward
-            if (board[currentPos[1] + 1][currentPos[0]] == null) {
+            if (currentPos[1] + 1 < Constants.ROW.getValue() && board[currentPos[1] + 1][currentPos[0]] == null) {
                 validMoves.add(new Integer[]{currentPos[0], currentPos[1] + 1});
 
                 // If the pawn moves for the first time, the pawn can move two positions forward
@@ -35,16 +36,16 @@ public class Pawn extends Piece {
             }
 
             // If there are diagonals pieces, valid to captured by pawns
-            if (board[currentPos[1] + 1][currentPos[0] - 1] != null) {
+            if (currentPos[0] - 1 >= 0 && board[currentPos[1] + 1][currentPos[0] - 1] != null) {
                 validMoves.add(new Integer[]{currentPos[0] - 1, currentPos[1] + 1});
             }
 
-            if (board[currentPos[1] + 1][currentPos[0] + 1] != null) {
+            if (currentPos[0] + 1 < Constants.COL.getValue() && board[currentPos[1] + 1][currentPos[0] + 1] != null) {
                 validMoves.add(new Integer[]{currentPos[0] + 1, currentPos[1] + 1});
             }
         } else {
             // Move forward
-            if (board[currentPos[1] - 1][currentPos[0]] == null) {
+            if (currentPos[1] - 1 >= 0 && board[currentPos[1] - 1][currentPos[0]] == null) {
                 validMoves.add(new Integer[]{currentPos[0], currentPos[1] - 1});
 
                 // If the pawn moves for the first time, the pawn can move two positions forward
@@ -54,11 +55,11 @@ public class Pawn extends Piece {
             }
 
             // If there are diagonals pieces, valid to captured by pawns
-            if (board[currentPos[1] - 1][currentPos[0] - 1] != null) {
+            if (currentPos[0] - 1 >= 0 && board[currentPos[1] - 1][currentPos[0] - 1] != null) {
                 validMoves.add(new Integer[]{currentPos[0] - 1, currentPos[1] - 1});
             }
 
-            if (board[currentPos[1] - 1][currentPos[0] + 1] != null) {
+            if (currentPos[0] + 1 < Constants.COL.getValue() && board[currentPos[1] - 1][currentPos[0] + 1] != null) {
                 validMoves.add(new Integer[]{currentPos[0] + 1, currentPos[1] - 1});
             }
         }
