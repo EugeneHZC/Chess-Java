@@ -24,6 +24,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
     private boolean isWhiteChecked = false;
     private boolean isBlackChecked = false;
 
+    private Integer[] whiteKingPos;
+    private Integer[] blackKingPos;
+
     private Timer timer;
     private final int delay = 5;
 
@@ -61,6 +64,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
         for (int col = 0; col < cols; col++) {
             board[6][col] = new Pawn(col * cellDimension + pieceOffSetInCell, cellDimension * 6 + pieceOffSetInCell, Player.WHITE);
         }
+
+        whiteKingPos = new Integer[]{0, 4};
+        blackKingPos = new Integer[]{7, 4};
 
         timer = new Timer(this.delay, this);
         timer.start();
@@ -154,14 +160,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             if (board[rowClicked][colClicked] != selectedPiece) {
                 for (Integer[] integers : validMoves) {
                     // If the move is in the piece's valid moves, then it makes the move (including capturing a piece)
-                    if (Arrays.equals(integers, new Integer[]{colClicked, rowClicked})) {
+                    if (Arrays.equals(integers, new Integer[]{rowClicked, colClicked})) {
                         assert selectedPiece != null;
 
                         selectedPiece.setIsFirstMove(false);
 
                         // Setting new piece position as the selected piece, setting old position as null (represents no piece)
                         board[rowClicked][colClicked] = selectedPiece;
-                        board[selectedPiece.getCurrentPos()[1]][selectedPiece.getCurrentPos()[0]] = null;
+                        board[selectedPiece.getCurrentPos()[0]][selectedPiece.getCurrentPos()[1]] = null;
 
                         // Setting the piece's old position to the new position
                         selectedPiece.setPosX(colClicked * this.cellDimension + pieceOffSetInCell);

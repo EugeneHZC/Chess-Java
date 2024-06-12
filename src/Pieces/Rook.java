@@ -24,50 +24,24 @@ public class Rook extends Piece {
         ArrayList<Integer[]> validMoves = new ArrayList<>();
         Integer[] currentPos = this.getCurrentPos();
 
-        // move down
-        for (int i = currentPos[1] + 1; i < Constants.ROW.getValue(); i++) {
-            if (board[i][currentPos[0]] == null) {
-                validMoves.add(new Integer[]{currentPos[0], i});
-            } else if (board[i][currentPos[0]].getPlayer() != this.getPlayer()) {
-                validMoves.add(new Integer[]{currentPos[0], i});
-                break;
-            } else {
-                break;
-            }
-        }
+        Integer[][] directions = new Integer[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
-        // move up
-        for (int i = currentPos[1] - 1; i >= 0; i--) {
-            if (board[i][currentPos[0]] == null) {
-                validMoves.add(new Integer[]{currentPos[0], i});
-            } else if (board[i][currentPos[0]].getPlayer() != this.getPlayer()) {
-                validMoves.add(new Integer[]{currentPos[0], i});
-                break;
-            } else {
-                break;
-            }
-        }
+        for (Integer[] d : directions) {
+            for (int i = 1; i < Constants.ROW.getValue(); i++) {
+                int endRow = currentPos[0] + d[0] * i;
+                int endCol = currentPos[1] + d[1] * i;
 
-        // move left
-        for (int i = currentPos[0] - 1; i >= 1; i--) {
-            if (board[currentPos[1]][i] == null) {
-                validMoves.add(new Integer[]{i, currentPos[1]});
-            } else if (board[currentPos[1]][i].getPlayer() != this.getPlayer()) {
-                validMoves.add(new Integer[]{i, currentPos[1]});
-            } else {
-                break;
-            }
-        }
-
-        // move right
-        for (int i = currentPos[0] + 1; i < Constants.COL.getValue(); i++) {
-            if (board[currentPos[1]][i] == null) {
-                validMoves.add(new Integer[]{i, currentPos[1]});
-            } else if (board[currentPos[1]][i].getPlayer() != this.getPlayer()) {
-                validMoves.add(new Integer[]{i, currentPos[1]});
-                break;
-            } else {
-                break;
+                if (0 <= endRow && endRow < Constants.ROW.getValue() && 0 <= endCol && endCol < Constants.COL.getValue()) {
+                    Integer[] endPos = new Integer[]{endRow, endCol};
+                    if (board[endRow][endCol] == null) {
+                        validMoves.add(endPos);
+                    } else if (board[endRow][endCol].getPlayer() != this.getPlayer()) {
+                        validMoves.add(endPos);
+                        break;
+                    } else {
+                        break;
+                    }
+                }
             }
         }
 

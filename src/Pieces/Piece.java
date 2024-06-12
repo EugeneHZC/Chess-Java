@@ -24,7 +24,9 @@ public abstract class Piece {
         this.posY = posY;
         this.image = loadImage(imagePath);
         this.player = player;
-        this.currentPos = new Integer[]{this.posX / Constants.CELL_DIMENSION.getValue(), this.posY / Constants.CELL_DIMENSION.getValue()};
+
+        // current position of piece [row, col]
+        this.currentPos = new Integer[]{this.posY / Constants.CELL_DIMENSION.getValue(), this.posX / Constants.CELL_DIMENSION.getValue()};
         this.type = type;
     }
 
@@ -55,7 +57,7 @@ public abstract class Piece {
     }
 
     public void setCurrentPos() {
-        this.currentPos = new Integer[]{this.posX / Constants.CELL_DIMENSION.getValue(), this.posY / Constants.CELL_DIMENSION.getValue()};
+        this.currentPos = new Integer[]{this.posY / Constants.CELL_DIMENSION.getValue(), this.posX / Constants.CELL_DIMENSION.getValue()};
     }
 
     public void setPosX(int posX) {
