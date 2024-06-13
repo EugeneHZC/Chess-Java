@@ -84,5 +84,5 @@ public abstract class Piece {
         return player;
     }
 
-    public abstract ArrayList<Integer[]> getValidMoves(Piece[][] board);
+    public abstract ArrayList<Integer[]> getMoves(Piece[][] board);
 }

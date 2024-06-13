@@ -21,7 +21,7 @@ public class King extends Piece {
     }
 
     @Override
-    public ArrayList<Integer[]> getValidMoves(Piece[][] board) {
+    public ArrayList<Integer[]> getMoves(Piece[][] board) {
         Integer[] currentPos = this.getCurrentPos();
         ArrayList<Integer[]> validMoves = new ArrayList<>();
 

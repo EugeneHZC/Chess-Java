@@ -20,7 +20,7 @@ public class Bishop extends Piece{
     }
 
     @Override
-    public ArrayList<Integer[]> getValidMoves(Piece[][] board) {
+    public ArrayList<Integer[]> getMoves(Piece[][] board) {
         ArrayList<Integer[]> validMoves = new ArrayList<>();
         Integer[] currentPos = this.getCurrentPos();
 
