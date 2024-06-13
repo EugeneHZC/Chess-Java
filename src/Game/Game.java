@@ -248,6 +248,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                     }
 
                     return validMoves;
+
                 } else if (board[check[0]][check[1]].getType() == Type.PAWN) {
                     Integer[] validSquare = new Integer[]{check[0], check[1]};
                     validMoves.add(validSquare);
@@ -269,6 +270,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                         }
                     }
 
+                    // TODO: generate the move for the king to escape when checked
                     // Go through the loop and remove all the possible moves that are not in the valid squares
                     for (Integer[] square : validSquares) {
                         for (int i = possibleMoves.toArray().length - 1; i >= 0; i--) {
@@ -381,7 +383,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
 
         // Check for rooks, bishops, queens attacks
         for (Integer[] direction : directions) {
-            for (int i = 0; i < this.rows; i++) {
+            for (int i = 1; i < this.rows; i++) {
                 int endRow = row + direction[0] * i;
                 int endCol = col + direction[1] * i;
 
