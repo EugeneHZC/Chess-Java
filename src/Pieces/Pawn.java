@@ -55,11 +55,11 @@ public class Pawn extends Piece {
             }
 
             // If there are diagonals pieces, valid to captured by pawns
-            if (currentPos[1] - 1 >= 0 && board[currentPos[0] - 1][currentPos[1] - 1] != null) {
+            if (currentPos[0] - 1 >= 0 && currentPos[1] - 1 >= 0 && board[currentPos[0] - 1][currentPos[1] - 1] != null) {
                 validMoves.add(new Integer[]{currentPos[0] - 1, currentPos[1] - 1});
             }
 
-            if (currentPos[1] + 1 < Constants.COL.getValue() && board[currentPos[0] - 1][currentPos[1] + 1] != null) {
+            if (currentPos[0] - 1 >= 0 && currentPos[1] + 1 < Constants.COL.getValue() && board[currentPos[0] - 1][currentPos[1] + 1] != null) {
                 validMoves.add(new Integer[]{currentPos[0] - 1, currentPos[1] + 1});
             }
         }

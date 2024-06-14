@@ -161,8 +161,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             if (board[rowClicked][colClicked] != selectedPiece) {
                 for (Integer[] integers : moves) {
                     // If the move is in the piece's valid moves, then it makes the move (including capturing a piece)
-                    if (Arrays.equals(integers, new Integer[]{rowClicked, colClicked})) {
-                        assert selectedPiece != null;
+                    if (Arrays.equals(integers, new Integer[]{rowClicked, colClicked}) && selectedPiece != null) {
 
                         selectedPiece.setIsFirstMove(false);
 
@@ -246,9 +245,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                             }
                         }
                     }
-
-                    return validMoves;
-
                 } else if (board[check[0]][check[1]].getType() == Type.PAWN) {
                     Integer[] validSquare = new Integer[]{check[0], check[1]};
                     validMoves.add(validSquare);
@@ -256,8 +252,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                     if (selectedPiece.getType() == Type.KING) {
                         validMoves.addAll(possibleMoves);
                     }
-
-                    return validMoves;
                 } else {
                     for (int i = 1; i < this.rows; i++) {
                         // Squares between the king the checking piece is valid as it can block
@@ -270,18 +264,26 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                         }
                     }
 
-                    // TODO: generate the move for the king to escape when checked
-                    // Go through the loop and remove all the possible moves that are not in the valid squares
-                    for (Integer[] square : validSquares) {
-                        for (int i = possibleMoves.toArray().length - 1; i >= 0; i--) {
-                            if (Arrays.equals(square, possibleMoves.get(i)) && selectedPiece.getType() != Type.KING) {
-                                validMoves.add(possibleMoves.get(i));
-                                break;
+                    // Generate the move for the king to escape when checked
+                    if (selectedPiece.getType() == Type.KING) {
+                        for (Integer[] move : possibleMoves) {
+                            if (!isSquareAttacked(move[0], move[1], selectedPiece)) {
+                                System.out.println("Move: " + Arrays.toString(move));
+                                System.out.println(isSquareAttacked(move[0], move[1], selectedPiece));
+                                validMoves.add(move);
+                            }
+                        }
+                    } else {
+                        // Go through the loop and add all the possible moves that are in the valid squares to valid moves
+                        for (Integer[] square : validSquares) {
+                            for (int i = possibleMoves.toArray().length - 1; i >= 0; i--) {
+                                if (Arrays.equals(square, possibleMoves.get(i))) {
+                                    validMoves.add(possibleMoves.get(i));
+                                    break;
+                                }
                             }
                         }
                     }
-
-                    return validMoves;
                 }
             } else if (checks.toArray().length > 1 && selectedPiece.getType() == Type.KING) {
                 // If there is a double check, it is impossible to block all, so only king can move
@@ -315,16 +317,22 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                         }
                     }
                 }
-
-                return validMoves;
-            } else {
-                return new ArrayList<>();
             }
         } else {
             // If there is no check, any piece can be moved except pins
             // King cannot be moved to a checked square
             if (selectedPiece.getType() != Type.KING) {
-                return possibleMoves;
+                if (pins.toArray().length == 0) {
+                    // If there are no pins, then any piece can be moved
+                    return possibleMoves;
+                } else {
+                    // Pins cannot be moved
+                    for (Integer[] pin : pins) {
+                        validMoves.addAll(generatePinnedPieceMoves(pin, selectedPiece));
+                    }
+                }
+
+                return validMoves;
             }
 
             for (Integer[] possibleMove : possibleMoves) {
@@ -333,8 +341,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                 }
             }
 
-            return validMoves;
         }
+        return validMoves;
     }
 
     private boolean isSquareAttacked(int row, int col, Piece selectedPiece) {
@@ -353,13 +361,13 @@ public class Game extends JPanel implements MouseListener, ActionListener {
         Integer[][] directions = new Integer[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
 
         // Check for pawns attacks
-        if (selectedPiece.getPlayer() == Player.WHITE && row < this.rows && col < this.cols) {
+        if (selectedPiece.getPlayer() == Player.WHITE && row - 1 >= 0 && col + 1 < this.cols && col - 1 >= 0) {
             if (board[row - 1][col - 1] != null && board[row - 1][col - 1].getType() == Type.PAWN && board[row - 1][col - 1].getPlayer() == Player.BLACK) {
                 return true;
             } else if (board[row - 1][col + 1] != null && board[row - 1][col + 1].getType() == Type.PAWN && board[row - 1][col + 1].getPlayer() == Player.BLACK) {
                 return true;
             }
-        } else if (selectedPiece.getPlayer() == Player.BLACK && row < this.rows && col < this.cols) {
+        } else if (selectedPiece.getPlayer() == Player.BLACK && row + 1 < this.rows && col + 1 < this.cols && col - 1 >= 0) {
             if (board[row + 1][col - 1] != null && board[row + 1][col - 1].getType() == Type.PAWN && board[row + 1][col - 1].getPlayer() == Player.WHITE) {
                 return true;
             } else if (board[row + 1][col + 1] != null && board[row + 1][col + 1].getType() == Type.PAWN && board[row + 1][col + 1].getPlayer() == Player.WHITE) {
@@ -390,7 +398,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                 if (0 <= endRow && endRow < this.rows && 0 <= endCol && endCol < this.cols) {
                     Piece piece = board[endRow][endCol];
 
-                    if (piece != null && piece.getPlayer() == enemy) {
+                    if (piece != null && piece.getPlayer() == enemy && piece.getType() != Type.KING) {
                         if ((direction[0] == 0 || direction[1] == 0) && (piece.getType() == Type.ROOK || piece.getType() == Type.QUEEN)) {
                             // If there is an enemy rook or a queen on the horizontal or vertical directions of king, that position is checked
                             return true;
@@ -399,9 +407,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                             return true;
                         } else {
                             // If there are other pieces other than queen, rook and bishops, then that square is not checked
-                            return false;
+                            break;
                         }
-                    } else if (piece != null && piece.getPlayer() == ally) {
+                    } else if (piece != null && piece.getPlayer() == ally && piece.getType() != Type.KING) {
                         break;
                     }
                 }
@@ -427,10 +435,47 @@ public class Game extends JPanel implements MouseListener, ActionListener {
         return false;
     }
 
+    private ArrayList<Integer[]> generatePinnedPieceMoves(Integer[] pin, Piece selectedPiece) {
+        ArrayList<Integer[]> moves = new ArrayList<>();
+        ArrayList<Integer[]> possibleMoves = selectedPiece.getMoves(board);
+
+        if (selectedPiece == board[pin[0]][pin[1]]) {
+            for (Integer[] possibleMove : possibleMoves) {
+                System.out.println("PossibleMove[0]: " + possibleMove[0]);
+                System.out.println("PossibleMove[1]: " + possibleMove[1]);
+                System.out.println("Pin[0]: " + pin[0]);
+                System.out.println("Pin[1]: " + pin[1]);
+
+                int rowDistance = possibleMove[0] - pin[0];
+                int colDistance = possibleMove[1] - pin[1];
+
+                if (rowDistance != 0 && colDistance != 0) {
+                    int rowDirection = rowDistance / Math.abs(rowDistance);
+                    int colDirection = colDistance / Math.abs(colDistance);
+
+                    System.out.println("Row direction: " + rowDirection);
+                    System.out.println("Col direction: " + colDirection);
+
+                    System.out.println("Pin[2]: " + pin[2]);
+                    System.out.println("Pin[3]: " + pin[3]);
+
+                    if (rowDirection == pin[2] && colDirection == pin[3]) {
+                        System.out.println(Arrays.toString(possibleMove));
+                        moves.add(possibleMove);
+                    }
+                }
+
+            }
+        }
+
+        return moves;
+    }
+
     private HashMap<String, ArrayList<Integer[]>> getChecksAndPins() {
         HashMap<String, ArrayList<Integer[]>> hashMap = new HashMap<>();
 
         // Pins: position of a single piece between ally king and enemy piece that is checking the king
+        // [row, col, row direction, col direction]
         ArrayList<Integer[]> pins = new ArrayList<>();
         // checks: position of piece that is checking the king [row, col, row direction, col direction]
         ArrayList<Integer[]> checks = new ArrayList<>();
@@ -465,7 +510,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
 
                     // If there's an ally piece, it could possibly be a pin
                     if (endPiece != null && endPiece.getPlayer() == ally) {
-                        // If there is already an ally piece before this, then both these pieces cannot be pins
+                        // If there is already an ally piece before this, then both these pieces are not pins
                         // (moving any of them doesn't affect)
                         if (possiblePins.toArray().length == 0) {
                             possiblePins.add(new Integer[]{endRow, endCol, directions[i][0], directions[i][1]});
@@ -530,7 +575,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             int endRow = kingPos[0] + knightDirection[0];
             int endCol = kingPos[1] + knightDirection[1];
 
-            if (0 <= endRow && endRow < this.rows && 0 <= endCol && endCol <= this.cols) {
+            if (0 <= endRow && endRow < this.rows && 0 <= endCol && endCol < this.cols) {
                 Piece endPiece = board[endRow][endCol];
 
                 if (endPiece != null && endPiece.getPlayer() == enemy && endPiece.getType() == Type.KNIGHT) {
