@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class Game extends JPanel implements MouseListener, ActionListener {
+public class Game extends JPanel implements MouseListener, ActionListener, KeyListener {
     private final int rows = Constants.ROW.getValue();
     private final int cols = Constants.COL.getValue();
     private final int pieceOffSetInCell = 5;
@@ -20,10 +20,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
     private final int windowsWidth = (int) (this.cellDimension * (cols + 1.0 / 4.0));
     private final int windowsHeight = (int) (this.cellDimension * (cols + 1.0 / 2.0) + this.cellDimension);
 
+    private boolean isGameActive = false;
+
     private Piece selectedPiece;
     private boolean isWhiteTurn = true;
     private boolean isWhiteChecked = false;
     private boolean isBlackChecked = false;
+    private boolean staleMate = false;
+    private boolean checkMate = false;
 
     private Integer[] whiteKingPos;
     private Integer[] blackKingPos;
@@ -35,6 +39,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
 
     public Game() {
         addMouseListener(this);
+        addKeyListener(this);
+        setFocusable(true);
 
         // Black side
         board[0][0] = new Rook(pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
@@ -66,6 +72,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             board[6][col] = new Pawn(col * cellDimension + pieceOffSetInCell, cellDimension * 6 + pieceOffSetInCell, Player.WHITE);
         }
 
+        // Setting both kings' current positions
         whiteKingPos = new Integer[]{7, 4};
         blackKingPos = new Integer[]{0, 4};
 
@@ -77,6 +84,15 @@ public class Game extends JPanel implements MouseListener, ActionListener {
         // background
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, this.windowsWidth, this.windowsHeight);
+
+        if (!isGameActive && !staleMate && !checkMate) {
+            graphics.setColor(Color.BLACK);
+            graphics.setFont(new Font("arial", Font.BOLD, 30));
+
+            graphics.drawString("Press space to begin", this.windowsWidth / 4, this.windowsHeight / 3);
+
+            return;
+        }
 
         // drawing the board
         for (int row = 0; row < rows; row++) {
@@ -107,8 +123,66 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             graphics.drawString("Black's turn", 10, this.windowsHeight - this.cellDimension);
         }
 
+        // Draw the text when game ends
+        graphics.setColor(Color.BLACK);
+        graphics.setFont(new Font("arial", Font.BOLD, 30));
+        if (checkMate || staleMate) {
+            if (checkMate && isWhiteChecked) {
+                graphics.drawString("Black wins!", this.windowsWidth / 4, this.windowsHeight / 3);
+            } else if (checkMate && isBlackChecked) {
+                graphics.drawString("White wins!", this.windowsWidth / 4, this.windowsHeight / 3);
+            } else if (staleMate) {
+                graphics.drawString("It's a draw!", this.windowsWidth / 4, this.windowsHeight / 3);
+            }
+
+            graphics.drawString("Press space to restart.", this.windowsWidth / 4, this.windowsHeight / 3);
+        }
+
         graphics.dispose();
     }
+
+    private void resetGame() {
+        // Black side
+        board[0][0] = new Rook(pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+        board[0][1] = new Knight(cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+        board[0][2] = new Bishop(2 * cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+        board[0][3] = new Queen(3 * cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+        board[0][4] = new King(4 * cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+        board[0][5] = new Bishop(5 * cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+        board[0][6] = new Knight(6 * cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+        board[0][7] = new Rook(7 * cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.BLACK);
+
+        // White side
+        board[7][0] = new Rook(pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+        board[7][1] = new Knight(cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+        board[7][2] = new Bishop(2 * cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+        board[7][3] = new Queen(3 * cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+        board[7][4] = new King(4 * cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+        board[7][5] = new Bishop(5 * cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+        board[7][6] = new Knight(6 * cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+        board[7][7] = new Rook(7 * cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.WHITE);
+
+        // Black pawns
+        for (int col = 0; col < cols; col++) {
+            board[1][col] = new Pawn(col * cellDimension + pieceOffSetInCell, cellDimension + pieceOffSetInCell, Player.BLACK);
+        }
+
+        // White pawns
+        for (int col = 0; col < cols; col++) {
+            board[6][col] = new Pawn(col * cellDimension + pieceOffSetInCell, cellDimension * 6 + pieceOffSetInCell, Player.WHITE);
+        }
+
+        // Setting both kings' current positions
+        whiteKingPos = new Integer[]{7, 4};
+        blackKingPos = new Integer[]{0, 4};
+
+        isWhiteTurn = true;
+        isWhiteChecked = false;
+        isBlackChecked = false;
+        staleMate = false;
+        checkMate = false;
+    }
+
 
     public int getWindowsWidth() {
         return windowsWidth;
@@ -126,6 +200,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (!isGameActive) return;
+
         int x = e.getX();
         int y = e.getY();
 
@@ -162,7 +238,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                 for (Integer[] integers : moves) {
                     // If the move is in the piece's valid moves, then it makes the move (including capturing a piece)
                     if (Arrays.equals(integers, new Integer[]{rowClicked, colClicked}) && selectedPiece != null) {
-
+                        // This is for the pawns, pawns can move 2 blocks forward in their first moves
                         selectedPiece.setIsFirstMove(false);
 
                         // Setting new piece position as the selected piece, setting old position as null (represents no piece)
@@ -183,7 +259,20 @@ public class Game extends JPanel implements MouseListener, ActionListener {
 
                         moves = selectedPiece.getMoves(board);
 
+                        if (isCheckMate()) {
+                            checkMate = true;
+                        }
+
+                        if (isStaleMate()) {
+                            staleMate = true;
+                        }
+
+                        pawnPromotion();
+
                         isWhiteTurn = !isWhiteTurn;
+                        isWhiteChecked = false;
+                        isBlackChecked = false;
+
                         break;
                     }
                 }
@@ -191,6 +280,19 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                 // deselect the piece after moving it, trying to make an invalid move or after capturing
                 // only activates if there is a second click on the board
                 selectedPiece = null;
+            }
+        }
+    }
+
+    private void pawnPromotion() {
+        // When a pawn piece reaches the end of the board, it gets promoted to a another piece (e.g. bishop, rook, queen)
+        for (int i = 0; i < this.cols; i++) {
+            if (isWhiteTurn && board[0][i] != null && board[0][i].getType() == Type.PAWN && board[0][i].getPlayer() == Player.WHITE) {
+                // When a white piece reaches the end of the board, the white pawn get promoted to a white queen
+                board[0][i] = new Queen(i * cellDimension + pieceOffSetInCell, pieceOffSetInCell, Player.WHITE);
+            } else if (!isWhiteTurn && board[7][i] != null && board[7][i].getType() == Type.PAWN && board[0][i].getPlayer() == Player.BLACK) {
+                // When a white piece reaches the end of the board, the black pawn get promoted to a black queen
+                board[0][i] = new Queen(i * cellDimension + pieceOffSetInCell, 7 * cellDimension + pieceOffSetInCell, Player.BLACK);
             }
         }
     }
@@ -268,8 +370,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                     if (selectedPiece.getType() == Type.KING) {
                         for (Integer[] move : possibleMoves) {
                             if (!isSquareAttacked(move[0], move[1], selectedPiece)) {
-                                System.out.println("Move: " + Arrays.toString(move));
-                                System.out.println(isSquareAttacked(move[0], move[1], selectedPiece));
                                 validMoves.add(move);
                             }
                         }
@@ -322,15 +422,15 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             // If there is no check, any piece can be moved except pins
             // King cannot be moved to a checked square
             if (selectedPiece.getType() != Type.KING) {
-                if (pins.toArray().length == 0) {
-                    // If there are no pins, then any piece can be moved
-                    return possibleMoves;
-                } else {
+                if (pins.toArray().length > 0) {
                     // Pins cannot be moved
                     for (Integer[] pin : pins) {
                         validMoves.addAll(generatePinnedPieceMoves(pin, selectedPiece));
                     }
                 }
+
+                // If there are no pins, then any piece can be moved
+                validMoves.addAll(possibleMoves);
 
                 return validMoves;
             }
@@ -441,23 +541,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
 
         if (selectedPiece == board[pin[0]][pin[1]]) {
             for (Integer[] possibleMove : possibleMoves) {
-                System.out.println("PossibleMove[0]: " + possibleMove[0]);
-                System.out.println("PossibleMove[1]: " + possibleMove[1]);
-                System.out.println("Pin[0]: " + pin[0]);
-                System.out.println("Pin[1]: " + pin[1]);
-
                 int rowDistance = possibleMove[0] - pin[0];
                 int colDistance = possibleMove[1] - pin[1];
 
                 if (rowDistance != 0 && colDistance != 0) {
                     int rowDirection = rowDistance / Math.abs(rowDistance);
                     int colDirection = colDistance / Math.abs(colDistance);
-
-                    System.out.println("Row direction: " + rowDirection);
-                    System.out.println("Col direction: " + colDirection);
-
-                    System.out.println("Pin[2]: " + pin[2]);
-                    System.out.println("Pin[3]: " + pin[3]);
 
                     if (rowDirection == pin[2] && colDirection == pin[3]) {
                         System.out.println(Arrays.toString(possibleMove));
@@ -597,6 +686,54 @@ public class Game extends JPanel implements MouseListener, ActionListener {
         return hashMap;
     }
 
+    private boolean isCheckMate() {
+        if (!isWhiteChecked || !isBlackChecked) {
+            return false;
+        }
+
+        Player player = isWhiteTurn ? Player.WHITE : Player.BLACK;
+
+        for (int row = 0; row < this.rows; row++) {
+            for (int col = 0; col < this.cols; col++) {
+                Piece piece = board[row][col];
+
+                if (piece != null && piece.getPlayer() == player) {
+                    ArrayList<Integer[]> validMoves = generateValidMoves(piece);
+
+                    if (!validMoves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isStaleMate() {
+        if (isWhiteChecked || isBlackChecked) {
+            return false;
+        }
+
+        Player player = isWhiteTurn ? Player.WHITE : Player.BLACK;
+
+        for (int row = 0; row < this.rows; row++) {
+            for (int col = 0; col < this.cols; col++) {
+                Piece piece = board[row][col];
+
+                if (piece != null && piece.getPlayer() == player) {
+                    ArrayList<Integer[]> validMoves = generateValidMoves(piece);
+
+                    if (!validMoves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
     }
@@ -611,5 +748,21 @@ public class Game extends JPanel implements MouseListener, ActionListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE && !isGameActive) {
+            isGameActive = true;
+            this.resetGame();
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
     }
 }
